@@ -3,14 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>控制台 (SETTINGS) - 黎梨的世界</title>
-    
-    <!-- V30 新增：自定義 App 圖標 (Base64 SVG) -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%231a1b26%22/><text x=%2250%22 y=%2250%22 font-family=%22sans-serif%22 font-weight=%22bold%22 font-size=%2250%22 fill=%22%23ff9e64%22 text-anchor=%22middle%22 dy=%22.35em%22>控</text></svg>">
-    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%231a1b26%22/><text x=%2250%22 y=%2250%22 font-family=%22sans-serif%22 font-weight=%22bold%22 font-size=%2250%22 fill=%22%23ff9e64%22 text-anchor=%22middle%22 dy=%22.35em%22>控</text></svg>">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
+    <title>控制台 (SETTINGS) - 黎梨 V30 終極穩定版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
@@ -50,8 +43,9 @@
         .toast-enter { transform: translateY(100%); opacity: 0; } .toast-enter-active { transform: translateY(0); opacity: 1; transition: all 0.3s ease; } .toast-exit { transform: translateY(0); opacity: 1; } .toast-exit-active { transform: translateY(100%); opacity: 0; transition: all 0.3s ease; }
     </style>
 </head>
-<body class="h-screen flex flex-col w-full text-sm relative">
+<body class="h-screen flex flex-col w-full text-sm relative" ontouchstart="App.unlockAudioContext()" onclick="App.unlockAudioContext()">
 
+    <!-- V30: 预加载音频标签 -->
     <audio id="startup-audio" preload="auto"></audio>
 
     <!-- VIEW 0: COVER -->
@@ -156,6 +150,8 @@
 
         const App = {
             data: [], currentId: null, fsTargetId: null, editMsgIndex: null, currentPin: "",
+            audioUnlocked: false,
+
             async init() {
                 try { await AssetDB.init(); } catch(e) { console.log("DB Fail"); }
                 const saved = localStorage.getItem('roleplay_saves_v2'); if (saved) { try { this.data = JSON.parse(saved); } catch(e) { this.createAdventure("默认冒险"); } } else { this.createAdventure("默认冒险"); }
@@ -165,6 +161,29 @@
                 document.getElementById('chat-container').addEventListener('click', (e) => { document.querySelectorAll('.message-group').forEach(el => el.classList.remove('active-touch')); const bubble = e.target.closest('.message-group'); if (bubble) bubble.classList.add('active-touch'); });
             },
 
+            // V30: 终极音频越狱
+            unlockAudioContext() {
+                if (this.audioUnlocked) return;
+                const audio = document.getElementById('startup-audio');
+                // 播放极短静音，欺骗浏览器
+                audio.volume = 0;
+                audio.play().then(() => {
+                    audio.pause();
+                    audio.currentTime = 0;
+                    audio.volume = 0.6; // 恢复音量
+                    this.audioUnlocked = true;
+                    console.log("Audio Unlocked");
+                }).catch(e => console.log("Silent play failed", e));
+            },
+
+            playStartupSound() { 
+                const a = document.getElementById('startup-audio'); 
+                a.volume = 0.6; 
+                // 强制重置，确保每次点击都能播
+                a.currentTime = 0;
+                a.play().catch(e => console.log("Play failed:", e)); 
+            },
+
             renderAestheticTitle(text) {
                 const container = document.getElementById('aesthetic-title'); container.innerHTML = '';
                 const str = text || "以文為碼，重構森羅萬象"; 
@@ -172,37 +191,18 @@
                 lines.forEach((line) => { const div = document.createElement('div'); div.className = 'title-line'; div.innerText = line; container.appendChild(div); });
             },
 
-            // V29 核心修复：新建逻辑闭环
+            // V29 修复
             createNewAdventure(t = "新冒险") {
-                const newId = Date.now().toString() + Math.floor(Math.random() * 1000).toString(); // V29: 增加随机数防止ID冲突
+                const newId = Date.now().toString() + Math.floor(Math.random() * 1000).toString();
                 const n = { id: newId, title: t, charName: "", charDesc: "", firstMes: "你好，旅行者。", worldScenario: "", userPersona: "", jailbreak: "", charAvatar: "", userAvatar: "", chatHistory: [] };
                 this.data.push(n);
                 this.saveToLocal();
-                
-                // 核心修复：强制指针跳转与视图刷新
                 this.currentId = newId;
-                
-                // 1. 刷新列表（确保 UI 上有这个新项目）
-                this.renderAdventureList();
-                
-                // 2. 强制加载数据到设定页表单
                 this.loadAdventure(newId);
-                
-                // 3. 强制切换到 Dashboard 视图 (处理 SPA 逻辑)
-                this.enterDashboard();
-                
-                // 4. 切换到 Settings Tab
+                this.renderAdventureList();
+                this.enterDashboard(); 
                 this.switchTab('settings');
-                
-                // 5. 聚焦输入框
-                setTimeout(() => {
-                    const titleInput = document.getElementById('input-title');
-                    if (titleInput) {
-                        titleInput.focus();
-                        titleInput.select();
-                    }
-                }, 200);
-                
+                setTimeout(() => document.getElementById('input-title').focus(), 100);
                 this.showToast("新篇章已開啟");
             },
 
@@ -212,18 +212,13 @@
                 if (adv) {
                     adv[key] = value;
                     this.saveToLocal();
-                    // 实时刷新列表，确保标题同步
-                    if (key === 'title') { 
-                        this.renderAdventureList(); 
-                        this.updateChatHeader(); 
-                    }
+                    if (key === 'title') { this.renderAdventureList(); this.updateChatHeader(); }
                     if (['charName', 'charAvatar'].includes(key)) this.updateChatHeader();
                 }
             },
             
-            // V29: 确保点击列表也能正确跳转
             enterChat(id) {
-                this.currentId = id; // 确保指针更新
+                this.currentId = id; 
                 this.loadAdventure(id);
                 document.getElementById('view-dashboard').classList.add('view-hidden');
                 document.getElementById('view-chat').classList.remove('view-hidden');
@@ -241,9 +236,27 @@
             async loadCoverSettings() { const s = JSON.parse(localStorage.getItem('roleplay_api_settings')) || {}; this.renderAestheticTitle(s.welcomeText); document.getElementById('input-welcome-text').value = s.welcomeText || ""; document.getElementById('input-passcode').value = s.passcode || ""; const b = await AssetDB.get('cover_image'); if (b) document.getElementById('view-cover').style.backgroundImage = `url(${URL.createObjectURL(b)})`; },
             handleCoverUpload(i) { const f = i.files[0]; if(!f) return; const r = new FileReader(); r.onload = async (e) => { const b = new Blob([e.target.result], {type: f.type}); await AssetDB.save('cover_image', b); this.loadCoverSettings(); this.showToast("封面已换"); }; r.readAsArrayBuffer(f); i.value = ''; },
             async clearCover() { await AssetDB.delete('cover_image'); document.getElementById('view-cover').style.backgroundImage = "url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop')"; this.showToast("封面重置"); },
-            playStartupSound() { const a = document.getElementById('startup-audio'); a.volume=0.6; a.play().catch(()=>{}); },
-            tryUnlock() { const s = JSON.parse(localStorage.getItem('roleplay_api_settings')) || {}; if (s.passcode && s.passcode.length === 4) { document.getElementById('keypad-overlay').classList.add('active'); this.currentPin = ""; this.updatePinDots(); } else { this.performUnlock(); } },
-            performUnlock() { this.playStartupSound(); this.animateScan(); },
+            
+            // V30 修改：点击瞬间直接播放
+            tryUnlock() { 
+                // 只要点了，立刻尝试播放（哪怕是静音也能解锁Context）
+                this.playStartupSound();
+                
+                const s = JSON.parse(localStorage.getItem('roleplay_api_settings')) || {}; 
+                if (s.passcode && s.passcode.length === 4) { 
+                    document.getElementById('keypad-overlay').classList.add('active'); 
+                    this.currentPin = ""; 
+                    this.updatePinDots(); 
+                } else { 
+                    this.animateScan(); 
+                } 
+            },
+            performUnlock() { 
+                // 再次确保播放
+                this.playStartupSound(); 
+                this.animateScan(); 
+            },
+            
             inputPin(n) { if (this.currentPin.length < 4) { this.currentPin += n; this.updatePinDots(); if (this.currentPin.length === 4) setTimeout(() => this.checkPin(), 200); } },
             clearPin() { this.currentPin = this.currentPin.slice(0, -1); this.updatePinDots(); },
             cancelPin() { document.getElementById('keypad-overlay').classList.remove('active'); this.currentPin = ""; this.updatePinDots(); },
@@ -256,7 +269,7 @@
             loadSystemSettings() { const s = JSON.parse(localStorage.getItem('roleplay_api_settings')) || { url: '', key: '', model: '' }; document.getElementById('input-api-url').value = s.url || ''; document.getElementById('input-api-key').value = s.key || ''; if(s.model) { const sel = document.getElementById('select-model'); sel.innerHTML = `<option value="${s.model}">${s.model}</option>`; sel.value = s.model; } this.loadCoverSettings(); },
             saveSystemSettings() { const url = document.getElementById('input-api-url').value; const key = document.getElementById('input-api-key').value; const model = document.getElementById('select-model').value; const welcomeText = document.getElementById('input-welcome-text').value; const passcode = document.getElementById('input-passcode').value; const old = JSON.parse(localStorage.getItem('roleplay_api_settings')) || {}; const newS = { ...old, url, key, model, welcomeText, passcode }; localStorage.setItem('roleplay_api_settings', JSON.stringify(newS)); this.renderAestheticTitle(welcomeText); },
             async fetchModels() { let url = document.getElementById('input-api-url').value.replace(/\/$/, ''); const key = document.getElementById('input-api-key').value; const select = document.getElementById('select-model'); if (!url) return alert("请先填写 API 地址"); select.innerHTML = '<option>连接中...</option>'; const fallback = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-1.5-flash-8b", "gemini-1.0-pro"]; try { let fUrl = "", h = {}; if (url.includes('googleapis.com')) { if (!url.includes('v1beta')) url += '/v1beta'; fUrl = `${url}/models?key=${key}`; } else { fUrl = `${url}/models`; h = { 'Authorization': `Bearer ${key}` }; } const res = await fetch(fUrl, { method: 'GET', headers: h }); if (!res.ok) throw new Error("Err"); const data = await res.json(); const models = data.models || data.data || []; select.innerHTML = ''; if (models.length === 0) { select.innerHTML = '<option value="">未找到</option>'; return; } models.forEach(m => { let id = m.name || m.id; if (id.startsWith('models/')) id = id.replace('models/', ''); const opt = document.createElement('option'); opt.value = id; opt.text = id; select.appendChild(opt); }); this.showToast(`已获取 ${models.length} 个模型`); } catch (err) { if (url.includes('googleapis')) { select.innerHTML = ''; fallback.forEach(m => { const opt = document.createElement('option'); opt.value = m; opt.text = m; select.appendChild(opt); }); this.showToast("已加载内置 Gemini 列表"); select.value = fallback[0]; this.saveSystemSettings(); } else { select.innerHTML = '<option value="">获取失败</option>'; const manual = prompt("连接失败，请输入模型：", "gpt-3.5-turbo"); if(manual) { select.innerHTML = `<option value="${manual}">${manual}</option>`; this.saveSystemSettings(); } } } },
-            handleRawPresetUpload(i) { const f = i.files; if (!f || f.length === 0) return; let txt = ""; let cnt = 0; Array.from(f).forEach(file => { const r = new FileReader(); r.onload = (e) => { txt += `\n\n--- File: ${file.name} ---\n${e.target.result}`; c++; if (c === f.length) { const j = document.getElementById('input-jailbreak'); j.value += txt; this.updateData('jailbreak', j.value); this.showToast(`已追加 ${f.length} 个文件`); i.value = ''; } }; r.readAsText(file); }); },
+            handleRawPresetUpload(i) { const f = i.files; if (!f || f.length === 0) return; let txt = ""; let c = 0; Array.from(f).forEach(file => { const r = new FileReader(); r.onload = (e) => { txt += `\n\n--- File: ${file.name} ---\n${e.target.result}`; c++; if (c === f.length) { const j = document.getElementById('input-jailbreak'); j.value += txt; this.updateData('jailbreak', j.value); this.showToast(`已追加 ${f.length} 个文件`); i.value = ''; } }; r.readAsText(file); }); },
             async generateAIResponse() { const adv = this.data.find(a => a.id === this.currentId); if (!adv) return; const s = JSON.parse(localStorage.getItem('roleplay_api_settings')); if (!s || !s.url || !s.key) { this.showToast("请先配置 API"); return; } const sys = [`[Character: ${adv.charName}]`, `[Description: ${adv.charDesc}]`, `[Scenario: ${adv.worldScenario}]`, `[User: ${adv.userPersona}]`, adv.jailbreak].join('\n\n'); let hist = []; const isGemini = s.url.includes('googleapis'); if (isGemini) { if(adv.firstMes) hist.push({ role: 'model', parts: [{ text: adv.firstMes }] }); adv.chatHistory.forEach(msg => hist.push({ role: msg.role === 'user' ? 'user' : 'model', parts: [{ text: msg.content }] })); } else { hist.push({ role: "system", content: sys }); if(adv.firstMes) hist.push({ role: "assistant", content: adv.firstMes }); adv.chatHistory.forEach(msg => hist.push({ role: msg.role === 'user' ? 'user' : 'assistant', content: msg.content })); } const c = document.getElementById('chat-container'); const tid = 'thinking-' + Date.now(); c.insertAdjacentHTML('beforeend', `<div id="${tid}" class="flex gap-3 animate-pulse"><div class="w-8 h-8 rounded-full bg-gray-700 shrink-0"></div><div class="bg-[#24283b] bg-opacity-60 backdrop-blur-md border border-[#2f334d] text-gray-400 p-3 text-sm rounded-r-xl rounded-bl-xl w-fit">Thinking...</div></div>`); c.scrollTop = c.scrollHeight; try { let fUrl, body, head = {}; if (isGemini) { let b = s.url.replace(/\/$/, ''); if (!b.includes('v1beta')) b += '/v1beta'; fUrl = `${b}/models/${s.model || 'gemini-1.5-flash'}:generateContent?key=${s.key}`; head = { 'Content-Type': 'application/json' }; body = JSON.stringify({ contents: hist, systemInstruction: { parts: [{ text: sys }] }, generationConfig: { temperature: parseFloat(document.getElementById('disp-temp').innerText)||0.9, maxOutputTokens: parseInt(document.getElementById('disp-tokens').innerText)||2048 } }); } else { fUrl = `${s.url}/chat/completions`; head = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${s.key}` }; body = JSON.stringify({ model: s.model, messages: hist, temperature: parseFloat(document.getElementById('disp-temp').innerText)||0.9, max_tokens: parseInt(document.getElementById('disp-tokens').innerText)||2048 }); } const res = await fetch(fUrl, { method: 'POST', headers: head, body }); if (!res.ok) throw new Error((await res.text())); const data = await res.json(); let reply = isGemini ? (data.candidates?.[0]?.content?.parts?.[0]?.text || "(No response)") : (data.choices?.[0]?.message?.content || "(No response)"); document.getElementById(tid).remove(); adv.chatHistory.push({ role: 'ai', content: reply, timestamp: Date.now() }); this.saveToLocal(); this.renderChat(); } catch (e) { document.getElementById(tid).remove(); this.showToast("API 错误"); console.error(e); c.insertAdjacentHTML('beforeend', `<div class="text-red-500 text-xs p-4 text-center w-fit">Error: ${e.message}</div>`); } },
             regenerateResponse() { const adv = this.data.find(a => a.id === this.currentId); if (!adv || !adv.chatHistory || adv.chatHistory.length === 0) return; const last = adv.chatHistory[adv.chatHistory.length - 1]; if (last.role === 'ai') { adv.chatHistory.pop(); this.saveToLocal(); this.renderChat(); } this.generateAIResponse(); },
             deleteAdventure(id) { this.data = this.data.filter(a => a.id !== id); this.saveToLocal(); if (this.data.length === 0) this.createNewAdventure(); else { if (id === this.currentId) this.loadAdventure(this.data[0].id); else this.renderAdventureList(); } this.showToast("存档已删除"); },
@@ -286,3 +299,4 @@
     </script>
 </body>
 </html>
+
