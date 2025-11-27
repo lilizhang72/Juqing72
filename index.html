@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>控制台 (SETTINGS) - 黎梨 V43 无限仓库版</title>
+    <title>控制台 (SETTINGS) - 黎梨 V44 全能导演版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
@@ -12,7 +12,7 @@
         /* --- 核心样式 --- */
         body { font-family: 'Noto Sans SC', sans-serif; background-color: #1a1b26; color: #a9b1d6; overflow: hidden; -webkit-tap-highlight-color: transparent; }
         
-        /* 封面 V27 */
+        /* 封面 & 动画 */
         #view-cover { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 1s ease-in-out, transform 1s ease-in-out; }
         .cover-hidden { opacity: 0; transform: scale(1.05); pointer-events: none; }
         #aesthetic-title { position: absolute; top: 15%; right: 12%; writing-mode: vertical-rl; text-orientation: upright; font-family: 'Noto Serif SC', serif; color: rgba(255, 255, 255, 0.9); text-shadow: 2px 2px 8px rgba(0,0,0,0.6); display: flex; gap: 12px; height: 60%; flex-wrap: wrap-reverse; align-content: flex-start; pointer-events: none; }
@@ -21,6 +21,7 @@
         .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: rgba(122, 162, 247, 0.8); box-shadow: 0 0 10px #7aa2f7; animation: scan 1.5s ease-in-out infinite; display: none; }
         @keyframes scan { 0% { top: 20%; opacity: 0; } 50% { opacity: 1; } 100% { top: 80%; opacity: 0; } }
 
+        /* Keypad */
         #keypad-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20000; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
         #keypad-overlay.active { opacity: 1; pointer-events: auto; }
         .key-btn { width: 72px; height: 72px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.9); font-size: 26px; font-weight: 300; display: flex; align-items: center; justify-content: center; transition: all 0.2s; cursor: pointer; backdrop-filter: blur(5px); }
@@ -28,7 +29,7 @@
         .pin-dot { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.6); transition: all 0.2s; }
         .pin-dot.filled { background: white; border-color: white; box-shadow: 0 0 8px rgba(255,255,255,0.5); }
 
-        /* 通用 */
+        /* UI 组件 */
         #app-background { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-size: cover; background-position: center; z-index: -1; opacity: 0.15; transition: opacity 0.5s ease; pointer-events: none; }
         .custom-scroll::-webkit-scrollbar { width: 4px; } .custom-scroll::-webkit-scrollbar-track { background: rgba(22, 22, 30, 0.5); } .custom-scroll::-webkit-scrollbar-thumb { background: rgba(47, 51, 77, 0.8); border-radius: 2px; }
         .nav-item.active { color: #ff9e64; font-weight: 500; position: relative; } .nav-item.active::after { content: ''; position: absolute; bottom: -12px; left: 0; width: 100%; height: 2px; background-color: #ff9e64; }
@@ -43,8 +44,17 @@
         .toast-enter { transform: translateY(100%); opacity: 0; } .toast-enter-active { transform: translateY(0); opacity: 1; transition: all 0.3s ease; } .toast-exit { transform: translateY(0); opacity: 1; } .toast-exit-active { transform: translateY(100%); opacity: 0; transition: all 0.3s ease; }
         .preview-thumb { width: 24px; height: 24px; border-radius: 4px; object-fit: cover; border: 1px solid #414868; margin-left: 8px; display: none; } .preview-thumb.show { display: block; }
         .preview-audio-icon { color: #7aa2f7; margin-left: 8px; display: none; cursor: pointer; } .preview-audio-icon.show { display: block; }
-        
-        /* V40: Flip Card Engine Core */
+
+        /* V44: Toggle Switch for Theatre Mode */
+        .toggle-checkbox:checked { right: 0; border-color: #ff9e64; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #ff9e64; }
+        .toggle-switch-container { position: relative; width: 44px; height: 24px; }
+        .toggle-label { display: block; overflow: hidden; cursor: pointer; border: 0 solid #bbb; border-radius: 20px; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #24283b; transition: background-color 0.2s; border: 1px solid #414868; }
+        .toggle-label:before { content: ""; display: block; width: 18px; height: 18px; margin: 2px; background: #c0caf5; position: absolute; top: 0; bottom: 0; right: 20px; border-radius: 50%; transition: all 0.2s; }
+        .toggle-checkbox:checked + .toggle-label:before { right: 0; background-color: #1a1b26; }
+        .toggle-checkbox { position: absolute; visibility: hidden; }
+
+        /* V40: Card Engine */
         .lq-perspective-container { perspective: 1500px; width: 100%; max-width: 400px; margin: 0 auto; }
         .lq-flip-card { width: 100%; background-color: transparent; cursor: pointer; position: relative; aspect-ratio: 3/5; }
         .lq-flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55); transform-style: preserve-3d; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2); border-radius: 12px; }
@@ -74,14 +84,15 @@
             <div class="grid grid-cols-3 gap-x-8 gap-y-6"><div class="key-btn" onclick="App.inputPin(1)">1</div><div class="key-btn" onclick="App.inputPin(2)">2</div><div class="key-btn" onclick="App.inputPin(3)">3</div><div class="key-btn" onclick="App.inputPin(4)">4</div><div class="key-btn" onclick="App.inputPin(5)">5</div><div class="key-btn" onclick="App.inputPin(6)">6</div><div class="key-btn" onclick="App.inputPin(7)">7</div><div class="key-btn" onclick="App.inputPin(8)">8</div><div class="key-btn" onclick="App.inputPin(9)">9</div><div class="key-btn text-xl" onclick="App.cancelPin()"><i class="fa-solid fa-arrow-left"></i></div><div class="key-btn" onclick="App.inputPin(0)">0</div><div class="key-btn text-xl" onclick="App.clearPin()"><i class="fa-solid fa-delete-left"></i></div></div>
             <div class="mt-12 text-white/40 text-[10px] tracking-[0.3em] font-serif">VERIFICATION REQUIRED</div>
         </div>
-        <div class="absolute bottom-8 text-[10px] text-gray-500 tracking-widest font-serif opacity-50">SYSTEM V43.0 READY</div>
+        <div class="absolute bottom-8 text-[10px] text-gray-500 tracking-widest font-serif opacity-50">SYSTEM V44.0 READY</div>
     </div>
 
     <div id="app-background"></div>
 
     <!-- VIEW A: DASHBOARD -->
     <div id="view-dashboard" class="view-container view-hidden" style="background-color: #1a1b26;">
-        <header class="h-14 bg-[#1f2335] flex items-center justify-between px-4 border-b border-[#16161e] shrink-0 z-50 shadow-sm"><div class="flex items-center gap-3"><i class="fa-solid fa-gear text-[#ff9e64] text-lg"></i><span class="font-bold text-lg text-[#c0caf5]">控制台</span></div><button class="text-[#565f89] hover:text-[#ff9e64] transition-colors" onclick="App.showToast('已自动保存')"><i class="fa-solid fa-check text-xl"></i></button></header>
+        <!-- V44 Header: Checkmark is now Manual Save -->
+        <header class="h-14 bg-[#1f2335] flex items-center justify-between px-4 border-b border-[#16161e] shrink-0 z-50 shadow-sm"><div class="flex items-center gap-3"><i class="fa-solid fa-gear text-[#ff9e64] text-lg"></i><span class="font-bold text-lg text-[#c0caf5]">控制台</span></div><button class="text-[#565f89] hover:text-[#ff9e64] transition-colors" onclick="App.manualSave()" title="强制保存"><i class="fa-solid fa-check text-xl"></i></button></header>
         <nav class="h-12 bg-[#1f2335] flex items-center justify-around border-b border-[#292e42] shrink-0 text-[#787c99]">
             <div class="nav-item active w-1/3 text-center py-3 cursor-pointer" onclick="App.switchTab('adventure')" id="nav-adventure">冒险</div>
             <div class="nav-item w-1/3 text-center py-3 cursor-pointer" onclick="App.switchTab('settings')" id="nav-settings">设定</div>
@@ -121,6 +132,18 @@
                     <div class="space-y-2"><div class="flex justify-between text-sm font-bold text-[#c0caf5]"><span>回复长度</span><span class="text-[#ff9e64] font-mono" id="disp-tokens">2048</span></div><input type="range" min="200" max="8192" step="100" value="2048" oninput="document.getElementById('disp-tokens').innerText = this.value"></div>
                     <div class="space-y-2"><div class="flex justify-between text-sm font-bold text-[#c0caf5]"><span>上下文记忆</span><span class="text-[#ff9e64] font-mono" id="disp-context">20</span></div><input type="range" min="5" max="100" step="1" value="20" oninput="document.getElementById('disp-context').innerText = this.value"></div>
                 </div>
+                <!-- V44 New Feature: Theatre Mode Switch -->
+                <div class="pt-6 border-t border-[#292e42] mt-4 flex items-center justify-between">
+                    <div>
+                        <span class="text-sm font-bold text-[#ff9e64] block">沈浸式劇場模式</span>
+                        <span class="text-[10px] text-[#565f89]">THEATRE MODE: 强制AI使用卡片</span>
+                    </div>
+                    <div class="toggle-switch-container">
+                        <input type="checkbox" id="theatre-mode-toggle" class="toggle-checkbox" onchange="App.saveSystemSettings()">
+                        <label for="theatre-mode-toggle" class="toggle-label"></label>
+                    </div>
+                </div>
+                <div class="h-24"></div>
             </div>
         </main>
     </div>
@@ -163,32 +186,22 @@
             data: [], currentId: null, fsTargetId: null, editMsgIndex: null, currentPin: "",
             audioUnlocked: false,
 
-            // V43: 核心數據邏輯重構
             async init() {
                 try { await AssetDB.init(); } catch(e) { console.log("DB Fail", e); }
                 
-                // [MIGRATION LOGIC] 檢查是否有舊數據並遷移
                 const oldData = localStorage.getItem('roleplay_saves_v2');
                 const newData = await AssetDB.get('roleplay_saves_v2');
 
                 if (oldData && !newData) {
-                    // 發現舊數據且新庫為空 -> 執行遷移
                     try {
                         const parsed = JSON.parse(oldData);
                         await AssetDB.save('roleplay_saves_v2', parsed);
                         this.data = parsed;
-                        // 遷移成功後，可選清空舊數據以釋放空間，這裡先保留以防萬一
-                        // localStorage.removeItem('roleplay_saves_v2'); 
                         this.showToast("存档已迁移至大仓库");
-                    } catch (e) {
-                        console.error("Migration Failed", e);
-                        this.createAdventure("默认冒险");
-                    }
+                    } catch (e) { this.createAdventure("默认冒险"); }
                 } else if (newData) {
-                    // 直接讀取新倉庫
                     this.data = newData;
                 } else {
-                    // 全新用戶
                     this.createAdventure("默认冒险");
                 }
 
@@ -204,15 +217,23 @@
                 this.updateAudioPreview();
             },
 
-            // V43: 修改保存邏輯，寫入 IndexedDB
+            // V44: 核心修復 - 每次調用都強制寫入 IndexedDB
             async saveToLocal() { 
                 try {
                     await AssetDB.save('roleplay_saves_v2', this.data);
-                    // 同步嘗試寫入 LocalStorage 作為備份（如果放得下的話），放不下就忽略
-                    try { localStorage.setItem('roleplay_saves_v2_backup', JSON.stringify(this.data)); } catch(e) {}
                 } catch (e) {
                     console.error("Save Error", e);
-                    this.showToast("保存失败: " + e.message);
+                    this.showToast("自动保存失败");
+                }
+            },
+            
+            // V44: 手動強制保存
+            async manualSave() {
+                try {
+                    await AssetDB.save('roleplay_saves_v2', this.data);
+                    this.showToast("✅ 強制保存成功");
+                } catch(e) {
+                    this.showToast("❌ 保存失敗: " + e.message);
                 }
             },
 
@@ -238,7 +259,19 @@
             renderAestheticTitle(text) { const c = document.getElementById('aesthetic-title'); c.innerHTML = ''; const str = text || "以文為碼，重構森羅萬象"; const lines = str.split(/[ ，,。.\n]/).filter(l => l.trim() !== ""); lines.forEach((line) => { const div = document.createElement('div'); div.className = 'title-line'; div.innerText = line; c.appendChild(div); }); },
 
             createNewAdventure(t = "新冒险") { const n = { id: Date.now().toString() + Math.floor(Math.random() * 1000).toString(), title: t, charName: "", charDesc: "", firstMes: "你好，旅行者。", worldScenario: "", userPersona: "", jailbreak: "", charAvatar: "", userAvatar: "", chatHistory: [] }; this.data.push(n); this.saveToLocal(); this.currentId = n.id; this.loadAdventure(n.id); this.renderAdventureList(); this.enterDashboard(); this.switchTab('settings'); setTimeout(() => document.getElementById('input-title').focus(), 100); this.showToast("新篇章已開啟"); },
-            updateData(key, value) { if (!this.currentId) return; const adv = this.data.find(a => a.id === this.currentId); if (adv) { adv[key] = value; this.saveToLocal(); if (key === 'title') { this.renderAdventureList(); this.updateChatHeader(); } if (['charName', 'charAvatar'].includes(key)) this.updateChatHeader(); } },
+            
+            // V44: Update Data 立即觸發保存
+            updateData(key, value) { 
+                if (!this.currentId) return; 
+                const adv = this.data.find(a => a.id === this.currentId); 
+                if (adv) { 
+                    adv[key] = value; 
+                    this.saveToLocal(); // 立即保存
+                    if (key === 'title') { this.renderAdventureList(); this.updateChatHeader(); } 
+                    if (['charName', 'charAvatar'].includes(key)) this.updateChatHeader(); 
+                } 
+            },
+
             enterChat(id) { this.currentId = id; this.loadAdventure(id); document.getElementById('view-dashboard').classList.add('view-hidden'); document.getElementById('view-chat').classList.remove('view-hidden'); const c = document.getElementById('chat-container'); setTimeout(() => c.scrollTop = c.scrollHeight, 50); },
 
             async loadAudioSettings() { const a = document.getElementById('startup-audio'); const d = await AssetDB.get('custom_audio'); if (d) { a.src = URL.createObjectURL(d); } else { a.src = "data:audio/wav;base64,UklGRl9vT1BXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU"; } },
@@ -247,7 +280,7 @@
             async loadBackground() { const b = await AssetDB.get('bg_image'); const el = document.getElementById('app-background'); if (b) { el.style.backgroundImage = `url(${URL.createObjectURL(b)})`; el.style.opacity = '0.4'; } else { el.style.backgroundImage = 'none'; el.style.opacity = '0'; } },
             handleBgUpload(i) { const f = i.files[0]; if(!f) return; const r = new FileReader(); r.onload = async (e) => { const b = new Blob([e.target.result], {type: f.type}); await AssetDB.save('bg_image', b); this.loadBackground(); this.updatePreviewThumb('bg_image', 'preview-bg'); this.showToast("背景已设"); }; r.readAsArrayBuffer(f); i.value = ''; },
             async clearBackground() { await AssetDB.delete('bg_image'); this.loadBackground(); this.updatePreviewThumb('bg_image', 'preview-bg'); this.showToast("背景已删"); },
-            async loadCoverSettings() { const s = JSON.parse(localStorage.getItem('roleplay_api_settings')) || {}; this.renderAestheticTitle(s.welcomeText); document.getElementById('input-welcome-text').value = s.welcomeText || ""; document.getElementById('input-passcode').value = s.passcode || ""; const b = await AssetDB.get('cover_image'); if (b) document.getElementById('view-cover').style.backgroundImage = `url(${URL.createObjectURL(b)})`; },
+            async loadCoverSettings() { const s = JSON.parse(localStorage.getItem('roleplay_api_settings')) || {}; this.renderAestheticTitle(s.welcomeText); document.getElementById('input-welcome-text').value = s.welcomeText || ""; document.getElementById('input-passcode').value = s.passcode || ""; document.getElementById('theatre-mode-toggle').checked = s.theatreMode || false; const b = await AssetDB.get('cover_image'); if (b) document.getElementById('view-cover').style.backgroundImage = `url(${URL.createObjectURL(b)})`; },
             handleCoverUpload(i) { const f = i.files[0]; if(!f) return; const r = new FileReader(); r.onload = async (e) => { const b = new Blob([e.target.result], {type: f.type}); await AssetDB.save('cover_image', b); this.loadCoverSettings(); this.updatePreviewThumb('cover_image', 'preview-cover'); this.showToast("封面已换"); }; r.readAsArrayBuffer(f); i.value = ''; },
             async clearCover() { await AssetDB.delete('cover_image'); document.getElementById('view-cover').style.backgroundImage = "url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop')"; this.updatePreviewThumb('cover_image', 'preview-cover'); this.showToast("封面重置"); },
 
@@ -262,10 +295,25 @@
             updateCharCount(t) { document.getElementById('char-count').innerText = t.value.length + ' chars'; },
             enterDashboard() { document.getElementById('view-chat').classList.add('view-hidden'); document.getElementById('view-dashboard').classList.remove('view-hidden'); this.switchTab('adventure'); },
             loadSystemSettings() { const s = JSON.parse(localStorage.getItem('roleplay_api_settings')) || { url: '', key: '', model: '' }; document.getElementById('input-api-url').value = s.url || ''; document.getElementById('input-api-key').value = s.key || ''; if(s.model) { const sel = document.getElementById('select-model'); sel.innerHTML = `<option value="${s.model}">${s.model}</option>`; sel.value = s.model; } this.loadCoverSettings(); },
-            saveSystemSettings() { const url = document.getElementById('input-api-url').value; const key = document.getElementById('input-api-key').value; const model = document.getElementById('select-model').value; const welcomeText = document.getElementById('input-welcome-text').value; const passcode = document.getElementById('input-passcode').value; const old = JSON.parse(localStorage.getItem('roleplay_api_settings')) || {}; const newS = { ...old, url, key, model, welcomeText, passcode }; localStorage.setItem('roleplay_api_settings', JSON.stringify(newS)); this.renderAestheticTitle(welcomeText); },
+            saveSystemSettings() { const url = document.getElementById('input-api-url').value; const key = document.getElementById('input-api-key').value; const model = document.getElementById('select-model').value; const welcomeText = document.getElementById('input-welcome-text').value; const passcode = document.getElementById('input-passcode').value; const theatreMode = document.getElementById('theatre-mode-toggle').checked; const old = JSON.parse(localStorage.getItem('roleplay_api_settings')) || {}; const newS = { ...old, url, key, model, welcomeText, passcode, theatreMode }; localStorage.setItem('roleplay_api_settings', JSON.stringify(newS)); this.renderAestheticTitle(welcomeText); },
             async fetchModels() { let url = document.getElementById('input-api-url').value.replace(/\/$/, ''); const key = document.getElementById('input-api-key').value; const select = document.getElementById('select-model'); if (!url) return alert("请先填写 API 地址"); select.innerHTML = '<option>连接中...</option>'; const fallback = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-1.5-flash-8b", "gemini-1.0-pro"]; try { let fUrl = "", h = {}; if (url.includes('googleapis.com')) { if (!url.includes('v1beta')) url += '/v1beta'; fUrl = `${url}/models?key=${key}`; } else { fUrl = `${url}/models`; h = { 'Authorization': `Bearer ${key}` }; } const res = await fetch(fUrl, { method: 'GET', headers: h }); if (!res.ok) throw new Error("Err"); const data = await res.json(); const models = data.models || data.data || []; select.innerHTML = ''; if (models.length === 0) { select.innerHTML = '<option value="">未找到</option>'; return; } models.forEach(m => { let id = m.name || m.id; if (id.startsWith('models/')) id = id.replace('models/', ''); const opt = document.createElement('option'); opt.value = id; opt.text = id; select.appendChild(opt); }); this.showToast(`已获取 ${models.length} 个模型`); } catch (err) { if (url.includes('googleapis')) { select.innerHTML = ''; fallback.forEach(m => { const opt = document.createElement('option'); opt.value = m; opt.text = m; select.appendChild(opt); }); this.showToast("已加载内置 Gemini 列表"); select.value = fallback[0]; this.saveSystemSettings(); } else { select.innerHTML = '<option value="">获取失败</option>'; const manual = prompt("连接失败，请输入模型：", "gpt-3.5-turbo"); if(manual) { select.innerHTML = `<option value="${manual}">${manual}</option>`; this.saveSystemSettings(); } } } },
             handleRawPresetUpload(i) { const f = i.files; if (!f || f.length === 0) return; let txt = ""; let c = 0; Array.from(f).forEach(file => { const r = new FileReader(); r.onload = (e) => { txt += `\n\n--- File: ${file.name} ---\n${e.target.result}`; c++; if (c === f.length) { const j = document.getElementById('input-jailbreak'); j.value += txt; this.updateData('jailbreak', j.value); this.showToast(`已追加 ${f.length} 个文件`); i.value = ''; } }; r.readAsText(file); }); },
-            async generateAIResponse() { const adv = this.data.find(a => a.id === this.currentId); if (!adv) return; const s = JSON.parse(localStorage.getItem('roleplay_api_settings')); if (!s || !s.url || !s.key) { this.showToast("请先配置 API"); return; } const sys = [`[Character: ${adv.charName}]`, `[Description: ${adv.charDesc}]`, `[Scenario: ${adv.worldScenario}]`, `[User: ${adv.userPersona}]`, adv.jailbreak].join('\n\n'); let hist = []; const isGemini = s.url.includes('googleapis'); if (isGemini) { if(adv.firstMes) hist.push({ role: 'model', parts: [{ text: adv.firstMes }] }); adv.chatHistory.forEach(msg => hist.push({ role: msg.role === 'user' ? 'user' : 'model', parts: [{ text: msg.content }] })); } else { hist.push({ role: "system", content: sys }); if(adv.firstMes) hist.push({ role: "assistant", content: adv.firstMes }); adv.chatHistory.forEach(msg => hist.push({ role: msg.role === 'user' ? 'user' : 'assistant', content: msg.content })); } const c = document.getElementById('chat-container'); const tid = 'thinking-' + Date.now(); c.insertAdjacentHTML('beforeend', `<div id="${tid}" class="flex gap-3 animate-pulse"><div class="w-8 h-8 rounded-full bg-gray-700 shrink-0"></div><div class="bg-[#24283b] bg-opacity-60 backdrop-blur-md border border-[#2f334d] text-gray-400 p-3 text-sm rounded-r-xl rounded-bl-xl w-fit">Thinking...</div></div>`); c.scrollTop = c.scrollHeight; try { let fUrl, body, head = {}; if (isGemini) { let b = s.url.replace(/\/$/, ''); if (!b.includes('v1beta')) b += '/v1beta'; fUrl = `${b}/models/${s.model || 'gemini-1.5-flash'}:generateContent?key=${s.key}`; head = { 'Content-Type': 'application/json' }; body = JSON.stringify({ contents: hist, systemInstruction: { parts: [{ text: sys }] }, generationConfig: { temperature: parseFloat(document.getElementById('disp-temp').innerText)||0.9, maxOutputTokens: parseInt(document.getElementById('disp-tokens').innerText)||2048 } }); } else { fUrl = `${s.url}/chat/completions`; head = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${s.key}` }; body = JSON.stringify({ model: s.model, messages: hist, temperature: parseFloat(document.getElementById('disp-temp').innerText)||0.9, max_tokens: parseInt(document.getElementById('disp-tokens').innerText)||2048 }); } const res = await fetch(fUrl, { method: 'POST', headers: head, body }); if (!res.ok) throw new Error((await res.text())); const data = await res.json(); let reply = isGemini ? (data.candidates?.[0]?.content?.parts?.[0]?.text || "(No response)") : (data.choices?.[0]?.message?.content || "(No response)"); document.getElementById(tid).remove(); adv.chatHistory.push({ role: 'ai', content: reply, timestamp: Date.now() }); this.saveToLocal(); this.renderChat(); } catch (e) { document.getElementById(tid).remove(); this.showToast("API 错误"); console.error(e); c.insertAdjacentHTML('beforeend', `<div class="text-red-500 text-xs p-4 text-center w-fit">Error: ${e.message}</div>`); } },
+            
+            // V44: AI 生成邏輯增加劇場模式指令注入
+            async generateAIResponse() { 
+                const adv = this.data.find(a => a.id === this.currentId); if (!adv) return; 
+                const s = JSON.parse(localStorage.getItem('roleplay_api_settings')); 
+                if (!s || !s.url || !s.key) { this.showToast("请先配置 API"); return; } 
+                
+                let sysPrompt = [`[Character: ${adv.charName}]`, `[Description: ${adv.charDesc}]`, `[Scenario: ${adv.worldScenario}]`, `[User: ${adv.userPersona}]`, adv.jailbreak].join('\n\n'); 
+                
+                // [THEATRE MODE INJECTION]
+                if (s.theatreMode) {
+                    sysPrompt += "\n\n[SYSTEM OVERRIDE: THEATRE MODE ACTIVE]\nIMPORTANT: You are now in Immersive Theatre Mode. For any content involving: SMS, Social Media Posts, News Reports, Status Screens, Letters, Inventory, or Small Scenes, you MUST NOT use plain text. You MUST render them as self-contained HTML/CSS Cards. Use the <div class='lq-scope-standalone'> wrapper. Make them look beautiful and stylistic. For normal dialogue, use plain text.";
+                }
+
+                let hist = []; const isGemini = s.url.includes('googleapis'); if (isGemini) { if(adv.firstMes) hist.push({ role: 'model', parts: [{ text: adv.firstMes }] }); adv.chatHistory.forEach(msg => hist.push({ role: msg.role === 'user' ? 'user' : 'model', parts: [{ text: msg.content }] })); } else { hist.push({ role: "system", content: sysPrompt }); if(adv.firstMes) hist.push({ role: "assistant", content: adv.firstMes }); adv.chatHistory.forEach(msg => hist.push({ role: msg.role === 'user' ? 'user' : 'assistant', content: msg.content })); } const c = document.getElementById('chat-container'); const tid = 'thinking-' + Date.now(); c.insertAdjacentHTML('beforeend', `<div id="${tid}" class="flex gap-3 animate-pulse"><div class="w-8 h-8 rounded-full bg-gray-700 shrink-0"></div><div class="bg-[#24283b] bg-opacity-60 backdrop-blur-md border border-[#2f334d] text-gray-400 p-3 text-sm rounded-r-xl rounded-bl-xl w-fit">Thinking...</div></div>`); c.scrollTop = c.scrollHeight; try { let fUrl, body, head = {}; if (isGemini) { let b = s.url.replace(/\/$/, ''); if (!b.includes('v1beta')) b += '/v1beta'; fUrl = `${b}/models/${s.model || 'gemini-1.5-flash'}:generateContent?key=${s.key}`; head = { 'Content-Type': 'application/json' }; body = JSON.stringify({ contents: hist, systemInstruction: { parts: [{ text: sysPrompt }] }, generationConfig: { temperature: parseFloat(document.getElementById('disp-temp').innerText)||0.9, maxOutputTokens: parseInt(document.getElementById('disp-tokens').innerText)||2048 } }); } else { fUrl = `${s.url}/chat/completions`; head = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${s.key}` }; body = JSON.stringify({ model: s.model, messages: hist, temperature: parseFloat(document.getElementById('disp-temp').innerText)||0.9, max_tokens: parseInt(document.getElementById('disp-tokens').innerText)||2048 }); } const res = await fetch(fUrl, { method: 'POST', headers: head, body }); if (!res.ok) throw new Error((await res.text())); const data = await res.json(); let reply = isGemini ? (data.candidates?.[0]?.content?.parts?.[0]?.text || "(No response)") : (data.choices?.[0]?.message?.content || "(No response)"); document.getElementById(tid).remove(); adv.chatHistory.push({ role: 'ai', content: reply, timestamp: Date.now() }); this.saveToLocal(); this.renderChat(); } catch (e) { document.getElementById(tid).remove(); this.showToast("API 错误"); console.error(e); c.insertAdjacentHTML('beforeend', `<div class="text-red-500 text-xs p-4 text-center w-fit">Error: ${e.message}</div>`); } },
+            
             regenerateResponse() { const adv = this.data.find(a => a.id === this.currentId); if (!adv || !adv.chatHistory || adv.chatHistory.length === 0) return; const last = adv.chatHistory[adv.chatHistory.length - 1]; if (last.role === 'ai') { adv.chatHistory.pop(); this.saveToLocal(); this.renderChat(); } this.generateAIResponse(); },
             deleteAdventure(id) { this.data = this.data.filter(a => a.id !== id); this.saveToLocal(); if (this.data.length === 0) this.createNewAdventure(); else { if (id === this.currentId) this.loadAdventure(this.data[0].id); else this.renderAdventureList(); } this.showToast("存档已删除"); },
             loadAdventure(id) { this.currentId = id; const adv = this.data.find(a => a.id === id); if (!adv) return; ['title', 'charName', 'charDesc', 'firstMes', 'worldScenario', 'userPersona', 'jailbreak'].forEach(key => { const el = document.getElementById(`input-${key.replace(/[A-Z]/g, m => "-" + m.toLowerCase())}`); if(el) el.value = adv[key] || ""; }); this.renderAvatar('char', adv.charAvatar); this.renderAvatar('user', adv.userAvatar); this.renderAdventureList(); this.renderChat(); },
