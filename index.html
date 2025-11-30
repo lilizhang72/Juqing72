@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>控制台 (SETTINGS) - 黎梨 V66.2 泰坦精修版</title>
+    <title>控制台 (SETTINGS) - 黎梨 V67.4 暴力破門版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
     
     <style>
-        /* --- V66 核心变量 --- */
+        /* --- V67 核心变量 --- */
         :root {
             --chat-font-size: 15px;
             --chat-line-height: 1.625;
@@ -17,7 +17,7 @@
             --chat-font-weight: 300;
         }
 
-        /* [CSS Firewall] 强制锁定背景 */
+        /* CSS Firewall */
         body { 
             font-family: 'Noto Sans SC', sans-serif; 
             background-color: #000 !important; 
@@ -26,7 +26,6 @@
             -webkit-tap-highlight-color: transparent; 
         }
         
-        /* 强制聊天文字颜色，但【排除】卡片内部 */
         .dynamic-text {
             font-size: var(--chat-font-size);
             line-height: var(--chat-line-height);
@@ -35,32 +34,37 @@
             transition: all 0.2s ease;
         }
 
-        /* [关键修复] 给卡片开特权通道 */
+        /* 卡片特权通道 */
         .lq-scope-standalone, .lq-scope-standalone * {
-            /* 允许卡片自定义颜色，不受全局锁影响 */
             color: inherit; 
-            /* 允许卡片自定义行高 (解决顶部空白问题的核心) */
             line-height: inherit; 
         }
-
-        /* [关键修复] 引擎层强制修正卡片布局 */
         .lq-scope-standalone {
-            /* 强制居中，对抗 Tailwind 干扰 */
             margin-left: auto !important;
             margin-right: auto !important;
-            /* 强制提拉，确保贴顶 */
             margin-top: -20px !important;
             margin-bottom: -10px !important;
-            /* 确保是块级显示 */
             display: block !important;
-            /* 确保宽度不塌缩 */
             width: calc(100% + 20px) !important;
             max-width: 400px !important;
         }
         
         /* 封面 & 动画 */
-        #view-cover { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 1s ease-in-out, transform 1s ease-in-out; }
+        /* [V67.4] 只有 Hitbox 响应点击，背景完全穿透 */
+        #view-cover { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 1s ease-in-out, transform 1s ease-in-out; pointer-events: none; }
         .cover-hidden { opacity: 0; transform: scale(1.05); pointer-events: none; }
+        
+        /* [V67.4] 暴力热区：透明，极大，极高层级 */
+        #login-hitbox {
+            position: absolute;
+            top: -20px; left: -20px; right: -20px; bottom: -20px; /* 扩大点击范围 */
+            z-index: 100000000; /* 一亿层级 */
+            cursor: pointer;
+            background: transparent; /* 看不见 */
+            pointer-events: auto; /* 摸得着 */
+            /* debug: background: rgba(255,0,0,0.3); 如果还不行就把这行取消注释看看红框在哪里 */
+        }
+
         #aesthetic-title { position: absolute; top: 15%; right: 12%; writing-mode: vertical-rl; text-orientation: upright; font-family: 'Noto Serif SC', serif; color: rgba(255, 255, 255, 0.9); text-shadow: 2px 2px 8px rgba(0,0,0,0.6); display: flex; gap: 12px; height: 60%; flex-wrap: wrap-reverse; align-content: flex-start; pointer-events: none; }
         .title-line { font-size: 2rem; font-weight: 600; letter-spacing: 0.2em; transition: all 0.5s; }
         .title-line:nth-child(odd) { margin-top: 0; } .title-line:nth-child(even) { margin-top: 40px; }
@@ -68,19 +72,26 @@
         @keyframes scan { 0% { top: 20%; opacity: 0; } 50% { opacity: 1; } 100% { top: 80%; opacity: 0; } }
 
         /* Keypad */
-        #keypad-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20000; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; }
-        #keypad-overlay.active { opacity: 1; pointer-events: auto; }
+        #keypad-overlay { 
+            position: absolute; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); 
+            display: none; 
+            flex-direction: column; align-items: center; justify-content: center; 
+            z-index: 999990;
+            opacity: 0; 
+            transition: opacity 0.3s ease; 
+            pointer-events: auto;
+        }
+        #keypad-overlay.active { display: flex; opacity: 1; }
+        
         .key-btn { width: 72px; height: 72px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.9); font-size: 26px; font-weight: 300; display: flex; align-items: center; justify-content: center; transition: all 0.2s; cursor: pointer; backdrop-filter: blur(5px); }
         .key-btn:active { background: rgba(255,255,255,0.25); transform: scale(0.92); border-color: rgba(255,255,255,0.4); }
         .pin-dot { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.6); transition: all 0.2s; }
         .pin-dot.filled { background: white; border-color: white; box-shadow: 0 0 8px rgba(255,255,255,0.5); }
 
-        /* V66 UI 组件升级 */
+        /* UI 组件 */
         #app-background { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-size: cover; background-position: center; z-index: -1; opacity: 0.15; transition: opacity 0.2s ease; pointer-events: none; }
-        
         .custom-scroll::-webkit-scrollbar { width: 4px; } .custom-scroll::-webkit-scrollbar-track { background: rgba(22, 22, 30, 0.1); } .custom-scroll::-webkit-scrollbar-thumb { background: rgba(47, 51, 77, 0.5); border-radius: 2px; }
         .nav-item.active { color: #ff9e64; font-weight: 500; position: relative; } .nav-item.active::after { content: ''; position: absolute; bottom: -12px; left: 0; width: 100%; height: 2px; background-color: #ff9e64; }
-        
         .custom-input { background-color: rgba(22, 22, 30, 0.6); border: 1px solid rgba(47, 51, 77, 0.5); color: #c0caf5; transition: all 0.2s; backdrop-filter: blur(8px); } 
         .custom-input:focus { outline: none; border-color: #ff9e64; box-shadow: 0 0 0 1px rgba(255, 158, 100, 0.2); background-color: rgba(22, 22, 30, 0.8); }
         select.custom-input { appearance: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; }
@@ -117,6 +128,17 @@
         
         #input-name-display { cursor: pointer; border-bottom: 1px dashed #565f89; padding-bottom: 1px; transition: color 0.2s; }
         #input-name-display:hover { color: #ff9e64; border-color: #ff9e64; }
+
+        /* Persona Avatar List */
+        .persona-avatar-item { width: 42px; height: 42px; border-radius: 50%; border: 2px solid transparent; opacity: 0.6; transition: all 0.2s; cursor: pointer; position: relative; flex-shrink: 0; }
+        .persona-avatar-item.active { opacity: 1; border-color: #ff9e64; transform: scale(1.1); box-shadow: 0 0 10px rgba(255,158,100,0.3); }
+        .persona-avatar-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; background: #1a1b26; }
+        
+        /* Modal for Selection */
+        #modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 9999; display: none; align-items: center; justify-content: center; animation: fadeIn 0.3s ease; }
+        #modal-overlay.active { display: flex; }
+        .modal-card { background: rgba(31, 35, 53, 0.95); border: 1px solid rgba(65, 72, 104, 0.5); border-radius: 16px; width: 85%; max-width: 320px; padding: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); text-align: center; transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        #modal-overlay.active .modal-card { transform: scale(1); }
     </style>
 </head>
 <body class="h-screen flex flex-col w-full text-sm relative" ontouchstart="App.unlockAudioEngine()" onclick="App.unlockAudioEngine()">
@@ -127,23 +149,42 @@
     <div id="view-cover">
         <div class="absolute inset-0 bg-black bg-opacity-40 backdrop-blur-sm"></div>
         <div id="aesthetic-title"></div>
-        <div class="relative z-10 flex flex-col items-center gap-4 mt-32">
-            <div id="login-btn" onclick="App.tryUnlock()" class="w-16 h-16 rounded-full border border-white/30 bg-white/10 backdrop-blur-md flex items-center justify-center cursor-pointer hover:bg-white/20 hover:scale-95 active:scale-90 transition-all relative overflow-hidden group tap-highlight-transparent z-50">
-                <i class="fa-solid fa-fingerprint text-2xl text-white/80 group-hover:text-white"></i>
+        
+        <!-- [V67.4] 暴力 Hitbox 方案 -->
+        <div class="relative flex flex-col items-center gap-4 mt-32" style="z-index: 50000; pointer-events: none;">
+            <!-- 这个容器只是为了定位，不拦截点击 -->
+            
+            <div class="w-16 h-16 rounded-full border border-white/30 bg-white/10 backdrop-blur-md flex items-center justify-center relative overflow-hidden">
+                <i class="fa-solid fa-fingerprint text-2xl text-white/80"></i>
                 <div id="scan-line" class="scan-line"></div>
+                
+                <!-- [THE HITBOX] 透明、巨大、置顶 -->
+                <div id="login-hitbox"></div>
             </div>
+            
             <p id="login-text" class="text-[10px] text-gray-400 tracking-widest uppercase font-serif">Touch ID</p>
         </div>
+
         <div id="keypad-overlay">
             <div class="mb-10 flex gap-4 transform scale-110"><div class="pin-dot" id="dot-1"></div><div class="pin-dot" id="dot-2"></div><div class="pin-dot" id="dot-3"></div><div class="pin-dot" id="dot-4"></div></div>
             <div class="grid grid-cols-3 gap-x-8 gap-y-6"><div class="key-btn" onclick="App.inputPin(1)">1</div><div class="key-btn" onclick="App.inputPin(2)">2</div><div class="key-btn" onclick="App.inputPin(3)">3</div><div class="key-btn" onclick="App.inputPin(4)">4</div><div class="key-btn" onclick="App.inputPin(5)">5</div><div class="key-btn" onclick="App.inputPin(6)">6</div><div class="key-btn" onclick="App.inputPin(7)">7</div><div class="key-btn" onclick="App.inputPin(8)">8</div><div class="key-btn" onclick="App.inputPin(9)">9</div><div class="key-btn text-xl" onclick="App.cancelPin()"><i class="fa-solid fa-arrow-left"></i></div><div class="key-btn" onclick="App.inputPin(0)">0</div><div class="key-btn text-xl" onclick="App.clearPin()"><i class="fa-solid fa-delete-left"></i></div></div>
             <div class="mt-12 text-white/40 text-[10px] tracking-[0.3em] font-serif">VERIFICATION REQUIRED</div>
         </div>
-        <div class="absolute bottom-8 text-[10px] text-gray-500 tracking-widest font-serif opacity-50">SYSTEM V66.2 TITANIUM REFINED</div>
+        <div class="absolute bottom-8 text-[10px] text-gray-500 tracking-widest font-serif opacity-50">SYSTEM V67.4 FORCE ENTRY</div>
     </div>
 
     <!-- V66: Global Background -->
     <div id="app-background"></div>
+
+    <!-- V67: Persona Selection Modal -->
+    <div id="modal-overlay">
+        <div class="modal-card">
+            <h3 class="text-[#c0caf5] font-bold text-lg mb-1 font-serif">靈魂選擇</h3>
+            <p class="text-[10px] text-[#787c99] mb-4">此時間線，你將以何種身份存在？</p>
+            <div id="persona-select-list" class="grid grid-cols-2 gap-3 mb-4 max-h-[200px] overflow-y-auto custom-scroll"></div>
+            <button onclick="document.getElementById('modal-overlay').classList.remove('active')" class="text-xs text-[#565f89] hover:text-[#c0caf5] mt-2">取消</button>
+        </div>
+    </div>
 
     <!-- VIEW A: DASHBOARD -->
     <div id="view-dashboard" class="view-container view-hidden">
@@ -168,7 +209,6 @@
                     <label class="text-xs font-bold text-[#bb9af7] uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-wand-magic-sparkles"></i> 門戶與個性化</label>
                     <div class="flex justify-between items-center"><span class="text-[10px] text-[#7a85b8] flex items-center gap-2">全局壁紙 <img id="preview-bg" class="preview-thumb"></span><div class="flex gap-2"><label class="cursor-pointer text-[10px] bg-[#24283b]/80 px-2 py-1 rounded border border-[#414868]/50 text-[#c0caf5]">上傳<input type="file" id="file-bg-upload" accept="image/*" class="hidden-file-input" onchange="App.handleBgUpload(this)"></label><button onclick="App.clearBackground()" class="text-[10px] bg-[#24283b]/80 px-2 py-1 rounded border border-[#414868]/50 text-red-400">清除</button></div></div>
                     
-                    <!-- [NEW] 背景浓度滑块 -->
                     <div class="space-y-2 px-1">
                         <div class="flex justify-between text-[10px] text-[#7a85b8]"><span>背景圖浓度</span><span class="text-[#ff9e64] font-mono" id="disp-bg-opacity">15%</span></div>
                         <input type="range" min="0" max="100" step="1" value="15" id="input-bg-opacity" oninput="document.getElementById('disp-bg-opacity').innerText = this.value + '%'; App.updateBgOpacity(this.value); App.saveSystemSettings()">
@@ -221,11 +261,37 @@
                 <div class="space-y-2"><label class="text-xs font-bold text-[#ff9e64] uppercase tracking-wider">剧本标题</label><input type="text" id="input-title" class="custom-input w-full p-3 rounded-md text-sm font-bold" oninput="App.updateScriptData('title', this.value)"></div>
                 <div class="space-y-3"><div class="flex justify-between items-end"><label class="text-xs font-bold text-[#ff9e64] uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-user"></i> 角色卡</label><label class="cursor-pointer bg-[#24283b]/80 hover:bg-[#2f334d] text-[10px] text-[#c0caf5] px-3 py-1.5 rounded border border-[#414868]/50 transition-colors flex items-center gap-1"><i class="fa-solid fa-upload"></i> 导入JSON<input type="file" id="file-char-import" class="hidden-file-input" onchange="App.handleFileImport(this, 'character')"></label></div><div class="bg-[#1f2335]/60 backdrop-blur-sm rounded-lg p-3 border border-[#292e42]/50"><div class="flex gap-3 mb-3"><label class="w-16 h-16 shrink-0 bg-[#1a1b26]/50 rounded-md relative overflow-hidden group cursor-pointer border border-[#414868]/50 hover:border-[#ff9e64]"><img id="img-char-avatar" class="w-full h-full object-cover hidden"><div id="ph-char-avatar" class="absolute inset-0 flex flex-col items-center justify-center text-[#565f89] group-hover:text-[#ff9e64]"><i class="fa-solid fa-camera text-sm"></i></div><input type="file" id="file-char-avatar" accept="image/*" class="hidden-file-input" onchange="App.handleImageUpload(this, 'charAvatar')"></label><div class="flex-1 flex flex-col justify-center gap-2"><input type="text" id="input-char-name" class="custom-input p-2 rounded text-sm w-full font-bold" placeholder="角色名称" oninput="App.updateScriptData('charName', this.value)"></div></div><div class="mt-3"><div class="flex justify-between mb-1"><p class="text-[10px] text-[#7a85b8]">人设描述</p><div class="flex gap-2"><button onclick="App.clearInput('input-char-desc')" class="text-[#565f89] hover:text-red-400 text-xs px-2 py-1"><i class="fa-solid fa-trash-can pointer-events-none"></i></button><button onclick="App.openFullscreen('input-char-desc', '人设描述')" class="text-[#565f89] hover:text-[#ff9e64] text-xs px-2 py-1"><i class="fa-solid fa-expand pointer-events-none"></i></button></div></div><textarea id="input-char-desc" class="custom-input w-full p-2 rounded text-xs leading-relaxed h-24 resize-none" oninput="App.updateScriptData('charDesc', this.value)"></textarea></div><div class="mt-3"><div class="flex justify-between mb-1"><p class="text-[10px] text-[#7a85b8]">开场白 (支持HTML)</p><div class="flex gap-2"><button onclick="App.clearInput('input-first-mes')" class="text-[#565f89] hover:text-red-400 text-xs px-2 py-1"><i class="fa-solid fa-trash-can pointer-events-none"></i></button><button onclick="App.openFullscreen('input-first-mes', '开场白')" class="text-[#565f89] hover:text-[#ff9e64] text-xs px-2 py-1"><i class="fa-solid fa-expand pointer-events-none"></i></button></div></div><textarea id="input-first-mes" class="custom-input w-full p-2 rounded text-xs leading-relaxed h-20 resize-none" oninput="App.updateScriptData('firstMes', this.value)"></textarea></div></div></div>
                 <div class="space-y-3"><div class="flex justify-between items-end"><label class="text-xs font-bold text-[#ff9e64] uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-globe"></i> 世界观</label><label class="cursor-pointer bg-[#24283b]/80 hover:bg-[#2f334d] text-[10px] text-[#c0caf5] px-3 py-1.5 rounded border border-[#414868]/50 transition-colors flex items-center gap-1"><i class="fa-solid fa-file-import pointer-events-none"></i> 导入<input type="file" id="file-world-import" accept=".json,.txt" class="hidden-file-input" onchange="App.handleFileImport(this, 'world')"></label></div><div class="bg-[#1f2335]/60 backdrop-blur-sm rounded-lg p-3 border border-[#292e42]/50 space-y-3"><div><div class="flex justify-between mb-1"><p class="text-[10px] text-[#7a85b8]">世界背景</p><div class="flex gap-2"><button onclick="App.clearInput('input-world-scenario')" class="text-[#565f89] hover:text-red-400 text-xs px-2 py-1"><i class="fa-solid fa-trash-can pointer-events-none"></i></button><button onclick="App.openFullscreen('input-world-scenario', '世界背景')" class="text-[#565f89] hover:text-[#ff9e64] text-xs px-2 py-1"><i class="fa-solid fa-expand pointer-events-none"></i></button></div></div><textarea id="input-world-scenario" class="custom-input w-full p-2 rounded text-xs leading-relaxed h-24 resize-none font-mono text-[#9aa5ce]" oninput="App.updateScriptData('worldScenario', this.value)"></textarea></div></div></div>
-                <div class="space-y-3"><div class="flex justify-between items-end"><label class="text-xs font-bold text-[#bb9af7] uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-sliders"></i> 高级预设</label></div><div class="relative bg-[#1f2335]/60 backdrop-blur-sm p-2 rounded border border-[#292e42]/50 flex gap-2"><label class="w-10 h-10 shrink-0 bg-[#2f334d]/80 rounded-full relative overflow-hidden group cursor-pointer"><img id="img-user-avatar" class="w-full h-full object-cover hidden"><div id="ph-user-avatar" class="absolute inset-0 flex items-center justify-center text-[#7aa2f7]"><i class="fa-solid fa-user pointer-events-none"></i></div><input type="file" id="file-user-avatar" accept="image/*" class="hidden-file-input" onchange="App.handleImageUpload(this, 'userAvatar')"></label><div class="flex-1"><div class="flex justify-between mb-1"><p class="text-[10px] text-[#7a85b8]">玩家设定 (YOU)</p><div class="flex gap-2"><button onclick="App.clearInput('input-user-persona')" class="text-[#565f89] hover:text-red-400 text-xs px-2 py-1"><i class="fa-solid fa-trash-can pointer-events-none"></i></button><button onclick="App.openFullscreen('input-user-persona', '玩家设定')" class="text-[#565f89] hover:text-[#ff9e64] text-xs px-2 py-1"><i class="fa-solid fa-expand pointer-events-none"></i></button></div></div><textarea id="input-user-persona" class="custom-input w-full p-2 rounded text-xs leading-relaxed h-12 resize-none" oninput="App.updateScriptData('userPersona', this.value)"></textarea></div></div><div class="relative"><div class="flex justify-between items-end mb-1 ml-1"><p class="text-[10px] text-[#7a85b8]">破限 (JAILBREAK)</p><div class="flex gap-2 items-center"><label class="cursor-pointer bg-[#24283b]/80 hover:bg-[#2f334d] text-[10px] text-[#c0caf5] px-2 py-0.5 rounded border border-[#414868]/50 transition-colors flex items-center gap-1 mr-2"><i class="fa-solid fa-folder-open pointer-events-none"></i> 批量导入<input type="file" id="file-preset-raw" multiple class="hidden-file-input" onchange="App.handleRawPresetUpload(this)"></label><button onclick="App.clearInput('input-jailbreak')" class="text-[#565f89] hover:text-red-400 text-xs px-2 py-1"><i class="fa-solid fa-trash-can pointer-events-none"></i></button><button onclick="App.openFullscreen('input-jailbreak', '破限设置')" class="text-[#565f89] hover:text-[#ff9e64] text-xs px-2 py-1"><i class="fa-solid fa-expand pointer-events-none"></i></button></div></div><textarea id="input-jailbreak" class="custom-input w-full p-2 rounded text-[10px] font-mono leading-relaxed h-32 resize-none text-[#73daca]" oninput="App.updateScriptData('jailbreak', this.value)"></textarea></div></div>
+                
+                <div class="space-y-3">
+                    <div class="flex justify-between items-end">
+                        <label class="text-xs font-bold text-[#bb9af7] uppercase tracking-wider flex items-center gap-2"><i class="fa-solid fa-masks-theater"></i> 玩家多重身份</label>
+                    </div>
+                    
+                    <div class="bg-[#1f2335]/60 backdrop-blur-sm p-3 rounded border border-[#292e42]/50">
+                        <div class="flex items-center gap-3 mb-4 overflow-x-auto custom-scroll pb-2" id="persona-list-container"></div>
+                        
+                        <div id="current-persona-editor" class="flex gap-3 border-t border-[#292e42]/50 pt-3 relative">
+                            <label class="w-16 h-16 shrink-0 bg-[#2f334d]/80 rounded-md relative overflow-hidden group cursor-pointer border border-[#414868]/50 hover:border-[#ff9e64] transition-all">
+                                <img id="img-persona-avatar" class="w-full h-full object-cover hidden">
+                                <div id="ph-persona-avatar" class="absolute inset-0 flex items-center justify-center text-[#7aa2f7]"><i class="fa-solid fa-user pointer-events-none"></i></div>
+                                <input type="file" id="file-persona-avatar" accept="image/*" class="hidden-file-input" onchange="App.handlePersonaAvatar(this)">
+                            </label>
+                            <div class="flex-1 flex flex-col gap-2">
+                                <div class="flex justify-between gap-2">
+                                    <input type="text" id="input-persona-name" class="custom-input p-2 rounded text-sm w-full font-bold text-[#ff9e64]" placeholder="身份名稱 (如: 正妻)" oninput="App.saveCurrentPersona()">
+                                    <button onclick="App.deleteCurrentPersona()" class="px-2 rounded bg-[#24283b] text-red-400 border border-[#2f334d] hover:bg-red-900/30"><i class="fa-solid fa-trash-can"></i></button>
+                                </div>
+                                <textarea id="input-persona-desc" class="custom-input w-full p-2 rounded text-xs leading-relaxed h-16 resize-none" placeholder="該身份的具體設定..." oninput="App.saveCurrentPersona()"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative"><div class="flex justify-between items-end mb-1 ml-1"><p class="text-[10px] text-[#7a85b8]">破限 (JAILBREAK)</p><div class="flex gap-2 items-center"><label class="cursor-pointer bg-[#24283b]/80 hover:bg-[#2f334d] text-[10px] text-[#c0caf5] px-2 py-0.5 rounded border border-[#414868]/50 transition-colors flex items-center gap-1 mr-2"><i class="fa-solid fa-folder-open pointer-events-none"></i> 批量导入<input type="file" id="file-preset-raw" multiple class="hidden-file-input" onchange="App.handleRawPresetUpload(this)"></label><button onclick="App.clearInput('input-jailbreak')" class="text-[#565f89] hover:text-red-400 text-xs px-2 py-1"><i class="fa-solid fa-trash-can pointer-events-none"></i></button><button onclick="App.openFullscreen('input-jailbreak', '破限设置')" class="text-[#565f89] hover:text-[#ff9e64] text-xs px-2 py-1"><i class="fa-solid fa-expand pointer-events-none"></i></button></div></div><textarea id="input-jailbreak" class="custom-input w-full p-2 rounded text-[10px] font-mono leading-relaxed h-32 resize-none text-[#73daca]" oninput="App.updateScriptData('jailbreak', this.value)"></textarea></div>
 
                 <div class="pt-8 border-t border-[#292e42]/50 mt-8">
                     <label class="text-xs font-bold text-[#7aa2f7] uppercase tracking-wider flex items-center gap-2 mb-4"><i class="fa-solid fa-clock-rotate-left"></i> 时间线 (SAVES)</label>
-                    <div onclick="App.createNewSave()" class="border border-dashed border-[#3b4261]/80 rounded-lg h-12 flex items-center justify-center cursor-pointer text-[#7aa2f7] hover:text-[#ff9e64] hover:border-[#ff9e64] transition-all bg-[#1f2335]/60 mb-4 text-xs backdrop-blur-sm"><div class="flex items-center gap-2"><i class="fa-solid fa-play"></i><span class="font-medium">開啟新輪迴 / 此時此刻</span></div></div>
+                    <div onclick="App.promptNewSave()" class="border border-dashed border-[#3b4261]/80 rounded-lg h-12 flex items-center justify-center cursor-pointer text-[#7aa2f7] hover:text-[#ff9e64] hover:border-[#ff9e64] transition-all bg-[#1f2335]/60 mb-4 text-xs backdrop-blur-sm"><div class="flex items-center gap-2"><i class="fa-solid fa-play"></i><span class="font-medium">開啟新輪迴 / 此時此刻</span></div></div>
                     <div id="save-list" class="space-y-2"></div>
                 </div>
                 <div class="h-24"></div>
@@ -257,7 +323,6 @@
                 <span class="setting-label">濃度</span>
                 <div class="setting-btn-group w-32"><div class="setting-btn active" onclick="App.updateAppearance('fontWeight', '300')" data-mode="normal">标准</div><div class="setting-btn" onclick="App.updateAppearance('fontWeight', '400')">加粗</div></div>
             </div>
-            <!-- [NEW] 字体颜色选择器 -->
             <div class="setting-row">
                 <span class="setting-label">颜色</span>
                 <div class="flex items-center gap-2">
@@ -314,10 +379,22 @@
 
         const App = {
             data: [], currentScriptId: null, currentSaveId: null, fsTargetId: null, editMsgIndex: null, currentPin: "", audioUnlocked: false,
-            currentIdentity: "YOU",
+            currentIdentity: "YOU", editingPersonaId: null, 
             dataLoaded: false,
 
             async init() {
+                // V67.4 MANUAL HITBOX BINDING
+                const hitbox = document.getElementById('login-hitbox');
+                if(hitbox) {
+                    const unlockFn = (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.tryUnlock();
+                    };
+                    hitbox.addEventListener('click', unlockFn);
+                    hitbox.addEventListener('touchend', unlockFn);
+                }
+
                 try { 
                     try { await AssetDB.init(); } catch(e) { console.warn("DB Fail", e); } 
                     const newData = await AssetDB.get('roleplay_saves_v50'); 
@@ -330,9 +407,11 @@
                         if(oldData) {
                              try {
                                 const oldList = JSON.parse(oldData);
+                                // Migration
                                 this.data = oldList.map(adv => ({
-                                    id: adv.id, title: adv.title, charName: adv.charName, charDesc: adv.charDesc, firstMes: adv.firstMes, worldScenario: adv.worldScenario, userPersona: adv.userPersona, jailbreak: adv.jailbreak, charAvatar: adv.charAvatar, userAvatar: adv.userAvatar,
-                                    saves: [{ id: Date.now().toString() + Math.random().toString().slice(2,5), title: "默認时间线", timestamp: Date.now(), chatHistory: adv.chatHistory || [] }]
+                                    id: adv.id, title: adv.title, charName: adv.charName, charDesc: adv.charDesc, firstMes: adv.firstMes, worldScenario: adv.worldScenario, jailbreak: adv.jailbreak, charAvatar: adv.charAvatar,
+                                    personas: [{ id: 'p-'+Date.now()+Math.random(), name: "默認", desc: adv.userPersona || "", avatar: adv.userAvatar || "" }],
+                                    saves: [{ id: Date.now().toString(), title: "默認时间线", timestamp: Date.now(), chatHistory: adv.chatHistory || [], personaId: null }]
                                 }));
                                 this.dataLoaded = true;
                                 await this.saveToLocal(); 
@@ -340,13 +419,13 @@
                         }
                     }
                 } catch (e) { 
-                    console.error("Critical Init Error", e);
-                    alert("数据加载异常，请刷新重试。若持续报错请联系开发者。");
-                    return; 
+                    this.showToast("數據重置（救援模式）");
+                    this.data = []; 
+                    this.dataLoaded = true;
                 }
                 
                 if (this.dataLoaded && this.data.length === 0) {
-                    this.createNewScript("默認剧本");
+                    this.createNewScript("默認劇本");
                 }
                 
                 try { await this.loadAudioSettings(); } catch(e) { console.warn("Audio load error:", e); } 
@@ -360,6 +439,8 @@
                 document.getElementById('chat-container').addEventListener('click', (e) => { document.querySelectorAll('.message-group').forEach(el => el.classList.remove('active-touch')); const bubble = e.target.closest('.message-group'); if (bubble) bubble.classList.add('active-touch'); });
                 document.addEventListener('click', (e) => { if(!e.target.closest('#appearance-menu') && !e.target.closest('button[onclick="App.toggleAppearanceMenu()"]')) { document.getElementById('appearance-menu').classList.remove('show'); }});
                 this.updatePreviewThumb('bg_image', 'preview-bg'); this.updatePreviewThumb('cover_image', 'preview-cover'); this.updateAudioPreview();
+                
+                this.showToast("SYSTEM READY");
             },
 
             async saveToLocal() { 
@@ -402,7 +483,6 @@
                 if(s.passcode) document.getElementById('input-passcode').value = s.passcode;
                 if(s.theatreMode !== undefined) document.getElementById('theatre-mode-toggle').checked = s.theatreMode;
                 
-                // Opacity Init
                 const op = s.bgOpacity !== undefined ? s.bgOpacity : 15;
                 document.getElementById('input-bg-opacity').value = op;
                 document.getElementById('disp-bg-opacity').innerText = op + '%';
@@ -412,32 +492,145 @@
                 this.updateLockIcon();
             },
             
-            updateBgOpacity(val) {
-                const el = document.getElementById('app-background');
-                el.style.opacity = val / 100;
-            },
-            
-            updateLockIcon() {
-                const p = document.getElementById('input-passcode').value;
-                const icon = document.getElementById('lock-status');
-                if(p && p.length === 4) { icon.className = "fa-solid fa-lock text-[10px] ml-2 text-green-400"; }
-                else { icon.className = "fa-solid fa-unlock text-[10px] ml-2 text-gray-500"; }
-            },
+            updateBgOpacity(val) { document.getElementById('app-background').style.opacity = val / 100; },
+            updateLockIcon() { const p = document.getElementById('input-passcode').value; const icon = document.getElementById('lock-status'); if(p && p.length === 4) { icon.className = "fa-solid fa-lock text-[10px] ml-2 text-green-400"; } else { icon.className = "fa-solid fa-unlock text-[10px] ml-2 text-gray-500"; } },
 
             createNewScript(t = "新剧本") { 
-                const n = { id: Date.now().toString() + Math.random().toString().slice(2,5), title: t, charName: "", charDesc: "", firstMes: "你好，旅行者。", worldScenario: "", userPersona: "", jailbreak: "", charAvatar: "", userAvatar: "", saves: [] }; 
+                const n = { 
+                    id: Date.now().toString() + Math.random().toString().slice(2,5), 
+                    title: t, charName: "", charDesc: "", firstMes: "你好，旅行者。", worldScenario: "", jailbreak: "", charAvatar: "",
+                    personas: [{ id: 'p-'+Date.now(), name: "默認", desc: "普通玩家", avatar: "" }],
+                    saves: [] 
+                }; 
                 if(!this.data) this.data = []; this.data.push(n); this.saveToLocal(); this.currentScriptId = n.id; this.loadScriptSettings(n.id); 
                 if(t !== "默認劇本" && t !== "緊急恢復劇本") { this.enterSettings(); setTimeout(() => document.getElementById('input-title').focus(), 100); this.showToast("新剧本已创建"); }
             },
             
             updateScriptData(key, value) { if (!this.currentScriptId) return; const script = this.data.find(s => s.id === this.currentScriptId); if (script) { script[key] = value; this.saveToLocal(); if (key === 'title') this.renderScriptList(); } },
 
-            createNewSave() { 
+            loadScriptSettings(id) { 
+                this.loadScriptSettings_Internal(id);
+            },
+            
+            loadScriptSettings_Internal(id) {
+                const script = this.data.find(s => s.id === id); if (!script) return;
+                if (!script.personas || !Array.isArray(script.personas)) {
+                    script.personas = [{ id: 'p-'+Date.now(), name: "默認", desc: script.userPersona || "", avatar: script.userAvatar || "" }];
+                }
+                ['title', 'charName', 'charDesc', 'firstMes', 'worldScenario', 'jailbreak'].forEach(key => { 
+                    const el = document.getElementById(`input-${key.replace(/[A-Z]/g, m => "-" + m.toLowerCase())}`); if(el) el.value = script[key] || ""; 
+                }); 
+                this.renderAvatar('char', script.charAvatar); 
+                this.renderPersonaList();
+            },
+
+            renderPersonaList() {
+                const script = this.data.find(s => s.id === this.currentScriptId);
+                const container = document.getElementById('persona-list-container');
+                container.innerHTML = '';
+                
+                if (!this.editingPersonaId || !script.personas.find(p => p.id === this.editingPersonaId)) {
+                    this.editingPersonaId = script.personas[0].id;
+                }
+
+                script.personas.forEach(p => {
+                    const el = document.createElement('div');
+                    el.className = `persona-avatar-item ${p.id === this.editingPersonaId ? 'active' : ''}`;
+                    el.onclick = () => { this.editingPersonaId = p.id; this.renderPersonaList(); this.loadPersonaToEditor(p); };
+                    const img = p.avatar || "https://api.dicebear.com/7.x/initials/svg?seed=ME";
+                    el.innerHTML = `<img src="${img}">`;
+                    container.appendChild(el);
+                });
+
+                const addBtn = document.createElement('div');
+                addBtn.className = "w-10 h-10 rounded-full border border-dashed border-[#565f89] flex items-center justify-center text-[#565f89] cursor-pointer hover:text-[#ff9e64] hover:border-[#ff9e64] flex-shrink-0 ml-2";
+                addBtn.innerHTML = '<i class="fa-solid fa-plus"></i>';
+                addBtn.onclick = () => this.addNewPersona();
+                container.appendChild(addBtn);
+
+                const current = script.personas.find(p => p.id === this.editingPersonaId);
+                this.loadPersonaToEditor(current);
+            },
+
+            loadPersonaToEditor(p) {
+                if(!p) return;
+                document.getElementById('input-persona-name').value = p.name || "";
+                document.getElementById('input-persona-desc').value = p.desc || "";
+                this.renderAvatar('persona', p.avatar);
+            },
+
+            addNewPersona() {
+                const script = this.data.find(s => s.id === this.currentScriptId);
+                const newP = { id: 'p-'+Date.now(), name: "新身份", desc: "", avatar: "" };
+                script.personas.push(newP);
+                this.editingPersonaId = newP.id;
+                this.saveToLocal();
+                this.renderPersonaList();
+                this.showToast("已添加新身份");
+            },
+
+            saveCurrentPersona() {
+                const script = this.data.find(s => s.id === this.currentScriptId);
+                const p = script.personas.find(x => x.id === this.editingPersonaId);
+                if(p) {
+                    p.name = document.getElementById('input-persona-name').value;
+                    p.desc = document.getElementById('input-persona-desc').value;
+                    this.saveToLocal();
+                }
+            },
+
+            handlePersonaAvatar(i) {
+                const f = i.files[0]; if (!f) return;
+                const r = new FileReader();
+                r.onload = (e) => {
+                    const script = this.data.find(s => s.id === this.currentScriptId);
+                    const p = script.personas.find(x => x.id === this.editingPersonaId);
+                    if(p) { p.avatar = e.target.result; this.saveToLocal(); this.renderPersonaList(); }
+                };
+                r.readAsDataURL(f); i.value = '';
+            },
+
+            deleteCurrentPersona() {
+                const script = this.data.find(s => s.id === this.currentScriptId);
+                if (script.personas.length <= 1) return this.showToast("至少保留一個身份");
+                if(!confirm("確定刪除此身份？")) return;
+                script.personas = script.personas.filter(p => p.id !== this.editingPersonaId);
+                this.editingPersonaId = script.personas[0].id;
+                this.saveToLocal();
+                this.renderPersonaList();
+            },
+
+            promptNewSave() {
+                const script = this.data.find(s => s.id === this.currentScriptId);
+                if (script.personas.length <= 1) {
+                    this.createNewSave(script.personas[0].id); 
+                } else {
+                    const list = document.getElementById('persona-select-list');
+                    list.innerHTML = '';
+                    script.personas.forEach(p => {
+                        const el = document.createElement('div');
+                        el.className = "bg-[#1f2335] border border-[#2f334d] p-2 rounded flex flex-col items-center cursor-pointer hover:border-[#ff9e64] hover:bg-[#24283b]";
+                        const img = p.avatar || "https://api.dicebear.com/7.x/initials/svg?seed=ME";
+                        el.innerHTML = `<img src="${img}" class="w-8 h-8 rounded-full mb-1 object-cover"><span class="text-[10px] text-[#c0caf5] font-bold truncate w-full text-center">${p.name}</span>`;
+                        el.onclick = () => {
+                            document.getElementById('modal-overlay').classList.remove('active');
+                            this.createNewSave(p.id);
+                        };
+                        list.appendChild(el);
+                    });
+                    document.getElementById('modal-overlay').classList.add('active');
+                }
+            },
+
+            createNewSave(personaId) { 
                 if (!this.currentScriptId) return; 
                 const script = this.data.find(s => s.id === this.currentScriptId); 
                 if(!script.saves) script.saves = [];
+                
+                if (!personaId && script.personas.length > 0) personaId = script.personas[0].id;
+
                 const saveId = Date.now().toString(); 
-                const newSave = { id: saveId, title: `輪迴 #${script.saves.length + 1}`, timestamp: Date.now(), chatHistory: [] };
+                const newSave = { id: saveId, title: `輪迴 #${script.saves.length + 1}`, timestamp: Date.now(), chatHistory: [], personaId: personaId };
                 script.saves.unshift(newSave); 
                 this.saveToLocal(); 
                 this.renderSaveList(); 
@@ -477,12 +670,22 @@
                 if (!script.saves || script.saves.length === 0) { l.innerHTML = `<div class="text-center text-[#565f89] text-xs py-4">暂无时间线记录</div>`; return; } 
                 script.saves.forEach(save => { 
                     const el = document.createElement('div'); 
+                    let personaName = "未知身份";
+                    if (script.personas) {
+                        const p = script.personas.find(x => x.id === save.personaId);
+                        if (p) personaName = p.name;
+                        else if (!save.personaId && script.personas.length > 0) personaName = script.personas[0].name; // fallback
+                    }
+
                     const lastMsg = save.chatHistory.length > 0 ? save.chatHistory[save.chatHistory.length-1].content.substring(0, 30) + "..." : "（新開局）"; 
                     const date = new Date(save.timestamp).toLocaleString(); 
                     el.className = `bg-[#16161e]/60 backdrop-blur-sm border border-[#2f334d]/50 rounded p-2 flex justify-between items-center hover:bg-[#1a1b26]/80 group`; 
                     el.innerHTML = `
                         <div class="flex-1 cursor-pointer" onclick="App.enterChat('${save.id}')">
-                            <div class="flex items-center gap-2"><span class="text-[#c0caf5] text-xs font-bold">${save.title}</span><span class="text-[10px] text-[#565f89]">${date}</span></div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[#c0caf5] text-xs font-bold">${save.title}</span>
+                                <span class="text-[9px] px-1.5 rounded bg-[#3b4261] text-[#7aa2f7]">${personaName}</span>
+                            </div>
                             <div class="text-[10px] text-[#787c99] mt-1 truncate pr-4">${lastMsg}</div>
                         </div>
                         <div class="flex gap-2">
@@ -494,14 +697,29 @@
                 }); 
             },
 
-            loadScriptSettings(id) { const script = this.data.find(s => s.id === id); if (!script) return; ['title', 'charName', 'charDesc', 'firstMes', 'worldScenario', 'userPersona', 'jailbreak'].forEach(key => { const el = document.getElementById(`input-${key.replace(/[A-Z]/g, m => "-" + m.toLowerCase())}`); if(el) el.value = script[key] || ""; }); this.renderAvatar('char', script.charAvatar); this.renderAvatar('user', script.userAvatar); },
+            loadScriptSettings(id) { 
+                this.loadScriptSettings_Internal(id);
+            },
+            
+            loadScriptSettings_Internal(id) {
+                const script = this.data.find(s => s.id === id); if (!script) return;
+                if (!script.personas || !Array.isArray(script.personas)) {
+                    script.personas = [{ id: 'p-'+Date.now(), name: "默認", desc: script.userPersona || "", avatar: script.userAvatar || "" }];
+                }
+                ['title', 'charName', 'charDesc', 'firstMes', 'worldScenario', 'jailbreak'].forEach(key => { 
+                    const el = document.getElementById(`input-${key.replace(/[A-Z]/g, m => "-" + m.toLowerCase())}`); if(el) el.value = script[key] || ""; 
+                }); 
+                this.renderAvatar('char', script.charAvatar); 
+                this.renderPersonaList();
+            },
+
             renameIdentity() { const newName = prompt("设置当前发言身份（例如：旁白、系统、神秘人）：", this.currentIdentity); if (newName && newName.trim() !== "") { this.currentIdentity = newName.trim(); document.getElementById('input-name-display').innerText = this.currentIdentity; } },
             
             renderChat() { 
                 const script = this.data.find(s => s.id === this.currentScriptId); 
-                if(!script) { console.error("Script not found"); return; }
+                if(!script) return;
                 const save = script.saves ? script.saves.find(s => s.id === this.currentSaveId) : null; 
-                if (!save) { console.error("Save not found"); return; } 
+                if (!save) return; 
                 
                 const c = document.getElementById('chat-container'); c.innerHTML = ''; 
                 if (script.firstMes) { this.appendChatBubble(script.firstMes, 'ai', -1); } 
@@ -517,9 +735,14 @@
                 const s = JSON.parse(localStorage.getItem('roleplay_api_settings')); 
                 if (!s || !s.url || !s.key) { this.showToast("請先配置 API"); return; } 
                 
-                let sysPrompt = [`[Character: ${script.charName}]`, `[Description: ${script.charDesc}]`, `[Scenario: ${script.worldScenario}]`, `[User: ${script.userPersona}]`, script.jailbreak].join('\n\n'); 
+                let activePersona = null;
+                if (script.personas) {
+                    activePersona = script.personas.find(p => p.id === save.personaId);
+                }
+                const userDesc = activePersona ? activePersona.desc : (script.userPersona || "");
+
+                let sysPrompt = [`[Character: ${script.charName}]`, `[Description: ${script.charDesc}]`, `[Scenario: ${script.worldScenario}]`, `[User: ${userDesc}]`, script.jailbreak].join('\n\n'); 
                 
-                // V66: Enhanced Theatre Mode Prompt
                 if (s.theatreMode) { 
                     sysPrompt += "\n\n[SYSTEM OVERRIDE: IMMERSIVE THEATRE MODE ACTIVE - TITANIUM EDITION]\nCRITICAL: You are now in High-Aesthetic Immersive Mode. For any content involving: SMS, Social Media, Status Screens, Letters, Inventory, or Small Scenes, you MUST NOT use plain text. You MUST render them as self-contained HTML/CSS Cards using the <div class='lq-scope-standalone'> wrapper.\n\n[Design Requirement]: The output MUST be visually stunning, using gradients, glassmorphism (backdrop-blur), and elegant typography. DO NOT output raw Markdown for these scenes. Force usage of HTML/CSS.\n\n[Behavior]: Be creative, poetic, and immersive."; 
                 } 
@@ -604,11 +827,27 @@
             cancelPin() { document.getElementById('keypad-overlay').classList.remove('active'); this.currentPin = ""; this.updatePinDots(); },
             updatePinDots() { for(let i=1; i<=4; i++) { const d = document.getElementById(`dot-${i}`); if (i <= this.currentPin.length) d.classList.add('filled'); else d.classList.remove('filled'); } },
             checkPin() { const s = JSON.parse(localStorage.getItem('roleplay_api_settings')) || {}; if (this.currentPin === s.passcode) { document.getElementById('keypad-overlay').classList.remove('active'); this.performUnlock(); } else { document.querySelector('.mb-10').classList.add('animate-bounce'); setTimeout(() => { document.querySelector('.mb-10').classList.remove('animate-bounce'); this.currentPin = ""; this.updatePinDots(); }, 500); } },
-            animateScan() { document.getElementById('scan-line').style.display = 'block'; document.getElementById('login-text').innerText = "Verifying..."; document.getElementById('login-text').classList.add('text-[#7aa2f7]', 'animate-pulse'); setTimeout(() => { document.getElementById('login-text').innerText = "Granted"; document.getElementById('login-text').classList.replace('text-[#7aa2f7]', 'text-green-400'); setTimeout(() => { document.getElementById('view-cover').classList.add('cover-hidden'); document.getElementById('view-dashboard').classList.remove('view-hidden'); }, 500); }, 1200); },
+            animateScan() { 
+                document.getElementById('scan-line').style.display = 'block'; 
+                document.getElementById('login-text').innerText = "Verifying..."; 
+                document.getElementById('login-text').classList.add('text-[#7aa2f7]', 'animate-pulse'); 
+                setTimeout(() => { 
+                    document.getElementById('login-text').innerText = "Granted"; 
+                    document.getElementById('login-text').classList.replace('text-[#7aa2f7]', 'text-green-400'); 
+                    setTimeout(() => { 
+                        // [V67.4] 强制移除 hidden 类，不依赖动画结束事件
+                        document.getElementById('view-cover').style.display = 'none'; 
+                        document.getElementById('view-dashboard').classList.remove('view-hidden'); 
+                    }, 500); 
+                }, 1200); 
+            },
             renderAestheticTitle(text) { const c = document.getElementById('aesthetic-title'); c.innerHTML = ''; const str = text || "以文為碼，重構森羅萬象"; const lines = str.split(/[ ，,。.\n]/).filter(l => l.trim() !== ""); lines.forEach((line) => { const div = document.createElement('div'); div.className = 'title-line'; div.innerText = line; c.appendChild(div); }); },
             handleImageUpload(i, t) { const f = i.files[0]; if (!f) return; const r = new FileReader(); r.onload = (e) => { this.updateScriptData(t, e.target.result); this.renderAvatar(t === 'charAvatar' ? 'char' : 'user', e.target.result); }; r.readAsDataURL(f); i.value = ''; },
-            renderAvatar(p, s) { const i = document.getElementById(`img-${p}-avatar`); const ph = document.getElementById(`ph-${p}-avatar`); if (s) { i.src = s; i.classList.remove('hidden'); ph.classList.add('hidden'); } else { i.src = ""; i.classList.add('hidden'); ph.classList.remove('hidden'); } },
-            exportData() { const j = JSON.stringify(this.data, null, 2); const b = new Blob([j], {type: "application/json"}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = `RP_V66_Backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); },
+            renderAvatar(p, s) { 
+                if (p === 'user') return; // V67: Disabled separate user avatar handler in favor of persona system
+                const i = document.getElementById(`img-${p}-avatar`); const ph = document.getElementById(`ph-${p}-avatar`); if (s) { i.src = s; i.classList.remove('hidden'); ph.classList.add('hidden'); } else { i.src = ""; i.classList.add('hidden'); ph.classList.remove('hidden'); } 
+            },
+            exportData() { const j = JSON.stringify(this.data, null, 2); const b = new Blob([j], {type: "application/json"}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = `RP_V67_Backup_${new Date().toISOString().slice(0,10)}.json`; a.click(); },
             importData(i) { const f = i.files[0]; if(!f) return; const r = new FileReader(); r.onload = (e) => { try { const j = JSON.parse(e.target.result); if (Array.isArray(j)) { this.data = j; this.dataLoaded = true; this.saveToLocal(); this.renderScriptList(); alert(`成功導入 ${j.length} 個劇本！`); } else { alert("格式錯誤"); } } catch(e) { alert("解析失敗"); } }; r.readAsText(f); i.value = ''; },
             handleFileImport(i, t) { const f = i.files[0]; if (!f) return; const r = new FileReader(); r.onload = (e) => { const raw = e.target.result; try { const j = JSON.parse(raw); if (t === 'character') { if(j.name) { document.getElementById('input-char-name').value = j.name; this.updateScriptData('charName', j.name); } if(j.description) { document.getElementById('input-char-desc').value = j.description; this.updateScriptData('charDesc', j.description); } if(j.first_mes) { document.getElementById('input-first-mes').value = j.first_mes; this.updateScriptData('firstMes', j.first_mes); } this.showToast("导入成功"); } else if (t === 'world') { let x = j.entries ? j.entries.map(en => `[${en.keys}]: ${en.content}`).join('\n\n') : (j.world_scenario || JSON.stringify(j, null, 2)); const c = document.getElementById('input-world-scenario').value; const n = c ? c + "\n\n" + x : x; document.getElementById('input-world-scenario').value = n; this.updateScriptData('worldScenario', n); this.showToast("世界书追加"); } } catch (err) { if (t === 'world') { const c = document.getElementById('input-world-scenario').value; const n = c ? c + "\n\n" + raw : raw; document.getElementById('input-world-scenario').value = n; this.updateScriptData('worldScenario', n); this.showToast("文本追加"); } } }; r.readAsText(f); i.value = ''; },
             handleAudioUpload(i) { const f = i.files[0]; if(!f) return; const r = new FileReader(); r.onload = async (e) => { const b = new Blob([e.target.result], { type: f.type }); await AssetDB.save('custom_audio', b); this.loadAudioSettings(); this.updateAudioPreview(); this.showToast("音效已更換"); setTimeout(()=>document.getElementById('startup-audio').play(), 500); }; r.readAsArrayBuffer(f); i.value = ''; },
@@ -630,9 +869,26 @@
             
             appendChatBubble(text, role, idx, timestamp = Date.now(), customName = null) { 
                 const script = this.data.find(s => s.id === this.currentScriptId); 
+                const save = script.saves.find(s => s.id === this.currentSaveId); // Need save to know persona
                 const isUser = role === 'user'; 
-                const avatar = isUser ? (script.userAvatar || "https://api.dicebear.com/7.x/initials/svg?seed=ME") : (script.charAvatar || "https://api.dicebear.com/7.x/adventurer/svg?seed=Gener"); 
-                const name = isUser ? (customName || "YOU") : (script.charName || "GM"); 
+                
+                // V67: Resolve Persona Avatar
+                let avatar = "";
+                let name = "";
+                if (isUser) {
+                    let activePersona = null;
+                    if (save && script.personas) {
+                        activePersona = script.personas.find(p => p.id === save.personaId);
+                    }
+                    if (!activePersona && script.personas && script.personas.length > 0) activePersona = script.personas[0]; // fallback
+                    
+                    avatar = activePersona ? (activePersona.avatar || "https://api.dicebear.com/7.x/initials/svg?seed=ME") : "https://api.dicebear.com/7.x/initials/svg?seed=ME";
+                    name = customName || (activePersona ? activePersona.name : "YOU");
+                } else {
+                    avatar = script.charAvatar || "https://api.dicebear.com/7.x/adventurer/svg?seed=Gener";
+                    name = script.charName || "GM";
+                }
+
                 const date = new Date(timestamp); 
                 const timeStr = `${date.getHours().toString().padStart(2,'0')}:${date.getMinutes().toString().padStart(2,'0')}`; 
                 let html = "";
